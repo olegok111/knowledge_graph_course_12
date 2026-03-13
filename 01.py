@@ -3,10 +3,11 @@ from nltk.corpus.reader.wordnet import WordNetError
 from nltk.corpus import wordnet_ic as wn_ic
 import pandas as pd
 import matplotlib.pyplot as plt
+import math
 
 
 def write_wn_info_to_csv(df: pd.DataFrame, filename: str):
-	df.to_csv(filename, sep="\t")
+	df.to_csv(filename, sep="\t", index=False)
 
 
 def lch(row):
@@ -15,7 +16,7 @@ def lch(row):
 	try:
 		return synset_i.lch_similarity(synset_j)
 	except WordNetError as e:
-		return -1.0
+		return math.nan
 
 
 def wup(row):
@@ -24,7 +25,7 @@ def wup(row):
 	try:
 		return synset_i.wup_similarity(synset_j)
 	except WordNetError as e:
-		return -1.0
+		return math.nan
 
 
 def jcn(row, icname="ic-bnc.dat"):
@@ -34,7 +35,7 @@ def jcn(row, icname="ic-bnc.dat"):
 	try:
 		return synset_i.jcn_similarity(synset_j, ic)
 	except WordNetError as e:
-		return -1.0
+		return math.nan
 
 
 if __name__ == "__main__":
@@ -44,7 +45,5 @@ if __name__ == "__main__":
 	sldf["lch"] = sldf.apply(lch, axis=1)
 	sldf["wup"] = sldf.apply(wup, axis=1)
 	sldf["jcn"] = sldf.apply(jcn, axis=1)
-	wndf = pd.DataFrame((sldf["word1word2"], sldf["lch"], sldf["wup"], sldf["jcn"])
-		#,columns=["lch", "wup", "jcn"]
-		)
+	wndf = pd.DataFrame({"word1word2": sldf["word1word2"], "lch": sldf["lch"], "wup": sldf["wup"], "jcn": sldf["jcn"]})
 	write_wn_info_to_csv(wndf, "out-simlex-similarities.csv")
